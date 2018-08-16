@@ -19,8 +19,8 @@ driver.get(
     'https://nid.naver.com/nidlogin.login?mode=form&url=https%3A%2F%2Fwww.naver.com')
 
 # 엘리먼트 접근
-driver.find_element_by_name('id').send_keys('tmna1234')
-driver.find_element_by_name('pw').send_keys('Dhrla153186!')
+driver.find_element_by_name('id').send_keys('NAVER_ID')
+driver.find_element_by_name('pw').send_keys('NAVER_PASSWORD')
 # 로그인 버튼을 눌러주자.
 driver.find_element_by_xpath('//*[@id="frmNIDLogin"]/fieldset/input').click()
 
