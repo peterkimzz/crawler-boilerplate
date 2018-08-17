@@ -1,44 +1,78 @@
 import csv
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import pymysql.cursors
 
 
 def init():
+    # selemium
     driver = getDriver()
-    file_path = 'C://Users/root/dev/crawl/region/nonum/chungbuk_nonum.csv'
+
+    # mysql
+    conn = setupMysql()
+
+    region_list = ['chungbuk_nonum', 'chungnam_nonum', 'daegu_nonum', 'daejun_nonum', 'gwangju_nonum', 'gyeonggi_nonum', 'incheon_nonum', 'jeju_nonum', 'jeonbuk_nonum', 'jeonnam_nonum', 'kangwon_nonum', 'kyungbuk_nonum', 'kyungnam_nonum', 'sejong_nonum', 'seoul_nonum', 'ulsan_nonum']
+
+    file_path = '/Users/rihankim/dev/crawl/region/nonum/chungnam_nonum.csv'
     url = 'https://map.naver.com'
-    my_file = open(file_path, encoding='utf-8')
-    academies = csv.reader(my_file)
 
-    for academy in academies:
+    # read csv
+    for region in region_list:
 
-        title = academy[0]
-        address_list = academy[2]
+        print(f'Searching tel-number is started at {region}.')
+        file_path = f'/Users/rihankim/dev/crawl/region/nonum/{region}.csv'
+        my_file = open(file_path, 'r', encoding='utf-8')
 
-        address = extractAddress(address_list)
-        search_keyword = f'{address} {title}'
+        academies = csv.reader(my_file)
 
-        driver.get(url)
-        driver.find_element_by_id('search-input').send_keys(search_keyword)
-        btn = driver.find_element_by_css_selector('div.sch fieldset button')
-        btn.click()
+        for i, academy in enumerate(academies):
+            
+            title = academy[0]
+            address_list = academy[2]
 
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
+            address = extractAddress(address_list)
+            search_keyword = f'{address} {title}'
 
-        cards = soup.select('div.lsnx dl.lsnx_det')
-        tels = soup.select('div.lsnx dl.lsnx_det dd.tel')
+            # open browser
+            driver.get(url)
+            driver.find_element_by_id('search-input').send_keys(search_keyword)
+            btn = driver.find_element_by_css_selector('div.sch fieldset button')
+            btn.click()
 
-        print(cards)
+            html = driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
 
-        # for tel in tels:
-        #     print(tel)
+            cards = soup.select('div.lsnx dl.lsnx_det')
+            tels = soup.select('div.lsnx dl.lsnx_det dd.tel')
 
-        #     if len(tel.text) > 0:
-        #         print(tel.text)
+            if len(cards) < 1:
+                print(f"Can't find {title} on Naver Maps.")
+            else:
+                
+                if len(tels) < 1:
+                    print(f"{title} has not registered on Naver Maps.")
+                else:
+                    print(f'{title} {tels[0].text}')
+                    try: 
+                        with conn.cursor() as cursor:
+                            sql = 'INSERT INTO temp_academies (title, address, tel) VALUES (%s, %s, %s)'
+                            cursor.execute(sql, (title, address_list, tels[0].text))
+                            conn.commit()
+                    finally:
+                        a = 1
 
     driver.quit()
     print('Finished finding telephone number of academy.')
+
+
+def setupMysql():
+
+    conn = pymysql.connect(host='localhost',
+        user='root',
+        password='qkfhrkrl0412',
+        db='gangmom')
+    
+    return conn
 
 
 def getDriver():
@@ -56,7 +90,7 @@ def getDriver():
     options.add_argument("lang=ko_KR")
 
     driver = webdriver.Chrome(
-        'C://Users/root/dev/crawl/drivers/chromedriver.exe', chrome_options=options)
+        '/Users/rihankim/dev/crawl/libs/chromedriver', options=options)
     driver.implicitly_wait(3)
     return driver
 
@@ -68,5 +102,5 @@ def extractAddress(address):
         address = f'{address_list[0]} {address_list[1]}'
         return address
 
-
+# run
 init()
