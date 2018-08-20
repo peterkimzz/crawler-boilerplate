@@ -10,16 +10,18 @@ def init():
 
     region_list = ["busan", "chungbuk", "chungnam", "daegu", "daejun", "gwangju", "gyeonggi", "incheon", "jeju", "jeonbuk", "jeonnam", "kangwon", "kyungbuk", "kyungnam", "sejong", "seoul", "ulsan"]
 
-    tel = '043-543-1013'
-    search_keyword = urllib.parse.quote(tel)
-    url = f"https://openapi.naver.com/v1/search/blog?query={search_keyword}&display=10&start=1&sort=random"
+    business_name = '봄봄국어논술'
+    search_keyword = urllib.parse.quote(business_name)
+    url = f"https://openapi.naver.com/v1/search/local?query={search_keyword}"
+    # url = f"https://openapi.naver.com/v1/search/blog?query={search_keyword}"
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)
     response = urllib.request.urlopen(request)
     rescode = response.getcode()
-    if(rescode==200):
+    if (rescode==200):
         response_body = response.read()
+        print(f"Search results for\n{business_name}")
         print(response_body.decode('utf-8'))
     else:
         print("Error Code:" + rescode)

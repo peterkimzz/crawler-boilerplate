@@ -11,9 +11,9 @@ def init():
     # mysql
     conn = setupMysql()
 
-    region_list = ['chungbuk_nonum', 'chungnam_nonum', 'daegu_nonum', 'daejun_nonum', 'gwangju_nonum', 'gyeonggi_nonum', 'incheon_nonum', 'jeju_nonum', 'jeonbuk_nonum', 'jeonnam_nonum', 'kangwon_nonum', 'kyungbuk_nonum', 'kyungnam_nonum', 'sejong_nonum', 'seoul_nonum', 'ulsan_nonum']
+    region_list = ['gyeonggi_nonum', 'incheon_nonum', 'jeju_nonum', 'jeonbuk_nonum', 'jeonnam_nonum', 'kangwon_nonum', 'kyungbuk_nonum', 'kyungnam_nonum', 'sejong_nonum', 'seoul_nonum', 'ulsan_nonum']
 
-    file_path = '/Users/rihankim/dev/crawl/region/nonum/chungnam_nonum.csv'
+    # file_path = '/Users/rihankim/dev/crawl/region/nonum/chungnam_nonum.csv'
     url = 'https://map.naver.com'
 
     # read csv
@@ -52,25 +52,25 @@ def init():
                 if len(tels) < 1:
                     print(f"{title} has not registered on Naver Maps.")
                 else:
-                    print(f'{title} {tels[0].text}')
+                    tel = tels[0].text.strip()
+                    print(f'{title} {tel}')
                     try: 
                         with conn.cursor() as cursor:
-                            sql = 'INSERT INTO temp_academies (title, address, tel) VALUES (%s, %s, %s)'
-                            cursor.execute(sql, (title, address_list, tels[0].text))
+                            sql = 'INSERT INTO academies (title, address, tel) VALUES (%s, %s, %s)'
+                            cursor.execute(sql, (title, address_list, tel))
                             conn.commit()
                     finally:
                         a = 1
 
-    driver.quit()
     print('Finished finding telephone number of academy.')
 
 
 def setupMysql():
 
-    conn = pymysql.connect(host='localhost',
+    conn = pymysql.connect(host='rds-gangmom.cfl7dcbrw3yo.ap-northeast-2.rds.amazonaws.com',
         user='root',
-        password='qkfhrkrl0412',
-        db='gangmom')
+        password='rkdskadjaak178',
+        db='sandbox')
     
     return conn
 
