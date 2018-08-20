@@ -11,7 +11,7 @@ def init():
     # mysql
     conn = setupMysql()
 
-    region_list = ['gyeonggi_nonum', 'incheon_nonum', 'jeju_nonum', 'jeonbuk_nonum', 'jeonnam_nonum', 'kangwon_nonum', 'kyungbuk_nonum', 'kyungnam_nonum', 'sejong_nonum', 'seoul_nonum', 'ulsan_nonum']
+    region_list = ['kyungnam_nonum', 'seoul_nonum', 'ulsan_nonum']
 
     # file_path = '/Users/rihankim/dev/crawl/region/nonum/chungnam_nonum.csv'
     url = 'https://map.naver.com'
