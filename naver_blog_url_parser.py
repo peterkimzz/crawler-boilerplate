@@ -2,39 +2,51 @@ from bs4 import BeautifulSoup
 from utils import mysql
 import urllib.request
 import json
+import time
+
+# MySQL
+conn = mysql.setupMysql()
 
 def init():
-    
-    # MySQL
-    conn = mysql.setupMysql()
 
     # List of Region
     region_list = ["busan", "chungbuk", "chungnam", "daegu", "daejun", "gwangju", "gyeonggi", "incheon", "jeju", "jeonbuk", "jeonnam", "kangwon", "kyungbuk", "kyungnam", "sejong", "seoul", "ulsan"]
+    region = '서울특별시'
 
     try:
         with conn.cursor() as cursor:
-            sql = 'SELECT id, title, tel FROM academies WHERE address LIKE "%세종특별%" LIMIT 3'
+            sql = f'''
+            SELECT 
+                id, 
+                title, 
+                tel 
+            FROM 
+                academies 
+            WHERE 
+                roadAddress LIKE "%{region}%" AND 
+                tel > "" AND
+                id > 98285
+            '''
             cursor.execute(sql)
             rows = cursor.fetchall()
 
             for row in rows:
 
+                academy_id = row[0]
                 academy_tel = row[2]
 
-                # DB에 전화번호가 있으면
                 if len(academy_tel) > 0:
-
-                    # 전화번호로 검색하고 
-                    result = fetchPageUrl(academy_tel)
-                # 없으면 API 호출을 하지 않는다.
+                    time.sleep(0.7)
+                    fetchPageUrl(academy_id, academy_tel)
                 else:
-                    print(f"{row[1]} doesn't have telephone numbebr in database.")
+                    print(f'{academy_id} dosen not have a tel-number.')
 
     finally:
         conn.close()
+        print('Parsing Blog Url is finished.')
 
 
-def fetchPageUrl(tel):
+def fetchPageUrl(id, tel):
 
     # API keys
     client_id = "ZrNIqAaKLMG3vON4TC5f"
@@ -42,24 +54,45 @@ def fetchPageUrl(tel):
 
     search_keyword = urllib.parse.quote(tel)
     url = f"https://openapi.naver.com/v1/search/local?query={search_keyword}"
-    # url = f"https://openapi.naver.com/v1/search/blog?query={search_keyword}"
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)
     response = urllib.request.urlopen(request)
     rescode = response.getcode()
-    print(f'Search results for {tel}')
     if (rescode==200):
-
         response_body = response.read()
         response = response_body.decode('utf-8')
         response_json = json.loads(response)
-        print(response_json.values())
+        items = response_json['items']
+        
+        # 검색 결과가 있을 때
+        if len(items) > 0:
+            item = items[0]
+            link = item['link']
 
-        return response
+            # link가 있을 때
+            if len(link) > 0:
+                print(f'{id} {tel} -> {link}')
+
+                with conn.cursor() as cursor:
+                    sql = f'''
+                    UPDATE
+                        academies
+                    SET
+                        link = "{link}"
+                    WHERE
+                        id = {id}
+                    '''
+                    result = cursor.execute(sql)
+                    conn.commit()
+            # link가 없을 때
+            else:
+                print(f'{id} {tel} does not have a link.')
+        # 검색 결과가 없을 때
+        else:
+            print(f'{id} {tel} does not have any result.')
     else:
         print("Error Code:" + rescode)
-        return rescode
 
 def extractAddress(address):
     address_list = address.split()
