@@ -11,7 +11,7 @@ def init():
 
     # List of Region
     region_list = ["busan", "chungbuk", "chungnam", "daegu", "daejun", "gwangju", "gyeonggi", "incheon", "jeju", "jeonbuk", "jeonnam", "kangwon", "kyungbuk", "kyungnam", "sejong", "seoul", "ulsan"]
-    region = '서울특별시'
+    region = '세종특별'
 
     try:
         with conn.cursor() as cursor:
@@ -25,7 +25,7 @@ def init():
             WHERE 
                 roadAddress LIKE "%{region}%" AND 
                 tel > "" AND
-                id > 98285
+                id > 89814
             '''
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -36,7 +36,7 @@ def init():
                 academy_tel = row[2]
 
                 if len(academy_tel) > 0:
-                    time.sleep(0.7)
+                    time.sleep(0.2)
                     fetchPageUrl(academy_id, academy_tel)
                 else:
                     print(f'{academy_id} dosen not have a tel-number.')
@@ -57,8 +57,11 @@ def fetchPageUrl(id, tel):
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)
+    print(1)
     response = urllib.request.urlopen(request)
+    print(2)
     rescode = response.getcode()
+    print(3)
     if (rescode==200):
         response_body = response.read()
         response = response_body.decode('utf-8')
@@ -72,7 +75,6 @@ def fetchPageUrl(id, tel):
 
             # link가 있을 때
             if len(link) > 0:
-                print(f'{id} {tel} -> {link}')
 
                 with conn.cursor() as cursor:
                     sql = f'''
@@ -83,6 +85,7 @@ def fetchPageUrl(id, tel):
                     WHERE
                         id = {id}
                     '''
+                    print(f'{id} {tel} -> {link} is updated.')
                     result = cursor.execute(sql)
                     conn.commit()
             # link가 없을 때
