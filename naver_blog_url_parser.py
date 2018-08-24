@@ -11,7 +11,7 @@ def init():
 
     # List of Region
     region_list = ["busan", "chungbuk", "chungnam", "daegu", "daejun", "gwangju", "gyeonggi", "incheon", "jeju", "jeonbuk", "jeonnam", "kangwon", "kyungbuk", "kyungnam", "sejong", "seoul", "ulsan"]
-    region = '세종특별'
+    region = '경기'
 
     try:
         with conn.cursor() as cursor:
@@ -23,9 +23,9 @@ def init():
             FROM 
                 academies 
             WHERE 
-                roadAddress LIKE "%{region}%" AND 
                 tel > "" AND
-                id > 89814
+                isUrlParsed != 1 AND
+                roadAddress LIKE "%{region}%"
             '''
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -57,11 +57,8 @@ def fetchPageUrl(id, tel):
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)
-    print(1)
     response = urllib.request.urlopen(request)
-    print(2)
     rescode = response.getcode()
-    print(3)
     if (rescode==200):
         response_body = response.read()
         response = response_body.decode('utf-8')
@@ -81,7 +78,8 @@ def fetchPageUrl(id, tel):
                     UPDATE
                         academies
                     SET
-                        link = "{link}"
+                        link = "{link}",
+                        isUrlParsed = 1
                     WHERE
                         id = {id}
                     '''
@@ -90,10 +88,32 @@ def fetchPageUrl(id, tel):
                     conn.commit()
             # link가 없을 때
             else:
-                print(f'{id} {tel} does not have a link.')
+                with conn.cursor() as cursor:
+                    sql = f'''
+                    UPDATE
+                        academies
+                    SET
+                        isUrlParsed = 1
+                    WHERE
+                        id = {id}
+                    '''
+                    print(f'{id} {tel} does not have a link.')
+                    result = cursor.execute(sql)
+                    conn.commit()
         # 검색 결과가 없을 때
         else:
-            print(f'{id} {tel} does not have any result.')
+            with conn.cursor() as cursor:
+                    sql = f'''
+                    UPDATE
+                        academies
+                    SET
+                        isUrlParsed = 1
+                    WHERE
+                        id = {id}
+                    '''
+                    print(f'{id} {tel} does not have any result.')
+                    result = cursor.execute(sql)
+                    conn.commit()
     else:
         print("Error Code:" + rescode)
 
@@ -105,4 +125,6 @@ def extractAddress(address):
         return address
 
 # run
+init()
+sleep(30)
 init()
