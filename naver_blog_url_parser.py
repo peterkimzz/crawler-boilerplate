@@ -14,7 +14,7 @@ def init():
 
     try:
         with conn.cursor() as cursor:
-            sql = f'''
+            sql = f"""
             SELECT 
                 id, 
                 title, 
@@ -24,7 +24,7 @@ def init():
             WHERE 
                 tel > "" AND
                 isUrlParsed != 1
-            '''
+            """
             cursor.execute(sql)
             rows = cursor.fetchall()
 
@@ -72,7 +72,7 @@ def fetchPageUrl(id, tel):
             if len(link) > 0:
 
                 with conn.cursor() as cursor:
-                    sql = f'''
+                    sql = f"""
                     UPDATE
                         leads
                     SET
@@ -80,35 +80,35 @@ def fetchPageUrl(id, tel):
                         isUrlParsed = 1
                     WHERE
                         id = {id}
-                    '''
+                    """
                     print(f'{id} {tel} -> {link} is updated.')
                     result = cursor.execute(sql)
                     conn.commit()
             # link가 없을 때
             else:
                 with conn.cursor() as cursor:
-                    sql = f'''
+                    sql = f"""
                     UPDATE
                         leads
                     SET
                         isUrlParsed = 1
                     WHERE
                         id = {id}
-                    '''
+                    """
                     print(f'{id} {tel} does not have a link.')
                     result = cursor.execute(sql)
                     conn.commit()
         # 검색 결과가 없을 때
         else:
             with conn.cursor() as cursor:
-                    sql = f'''
+                    sql = f"""
                     UPDATE
                         leads
                     SET
                         isUrlParsed = 1
                     WHERE
                         id = {id}
-                    '''
+                    """
                     print(f'{id} {tel} does not have any result.')
                     result = cursor.execute(sql)
                     conn.commit()
