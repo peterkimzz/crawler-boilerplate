@@ -14,7 +14,7 @@ def init():
 
     try:
         with conn.cursor() as cursor:
-            sql = f"""
+            sql = """
             SELECT 
                 id, 
                 title, 
