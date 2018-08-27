@@ -11,7 +11,6 @@ def init():
 
     # List of Region
     region_list = ["busan", "chungbuk", "chungnam", "daegu", "daejun", "gwangju", "gyeonggi", "incheon", "jeju", "jeonbuk", "jeonnam", "kangwon", "kyungbuk", "kyungnam", "sejong", "seoul", "ulsan"]
-    region = '경기'
 
     try:
         with conn.cursor() as cursor:
@@ -21,11 +20,10 @@ def init():
                 title, 
                 tel 
             FROM 
-                academies 
+                leads 
             WHERE 
                 tel > "" AND
-                isUrlParsed != 1 AND
-                roadAddress LIKE "%{region}%"
+                isUrlParsed != 1
             '''
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -76,7 +74,7 @@ def fetchPageUrl(id, tel):
                 with conn.cursor() as cursor:
                     sql = f'''
                     UPDATE
-                        academies
+                        leads
                     SET
                         link = "{link}",
                         isUrlParsed = 1
@@ -91,7 +89,7 @@ def fetchPageUrl(id, tel):
                 with conn.cursor() as cursor:
                     sql = f'''
                     UPDATE
-                        academies
+                        leads
                     SET
                         isUrlParsed = 1
                     WHERE
@@ -105,7 +103,7 @@ def fetchPageUrl(id, tel):
             with conn.cursor() as cursor:
                     sql = f'''
                     UPDATE
-                        academies
+                        leads
                     SET
                         isUrlParsed = 1
                     WHERE
@@ -124,7 +122,9 @@ def extractAddress(address):
         address = f'{address_list[0]} {address_list[1]}'
         return address
 
-# run
+# run 3 times each a minute.
 init()
-sleep(30)
+sleep(20)
+init()
+sleep(20)
 init()
