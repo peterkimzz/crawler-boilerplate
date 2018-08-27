@@ -37,7 +37,7 @@ def init():
                     time.sleep(0.2)
                     fetchPageUrl(academy_id, academy_tel)
                 else:
-                    print(f'{academy_id} dosen not have a tel-number.')
+                    print('$s dosen not have a tel-number.' % academy_id)
 
     finally:
         conn.close()
@@ -51,7 +51,7 @@ def fetchPageUrl(id, tel):
     client_secret = "oR39iWuuOr"
 
     search_keyword = urllib.parse.quote(tel)
-    url = f"https://openapi.naver.com/v1/search/local?query={search_keyword}"
+    url = "https://openapi.naver.com/v1/search/local?query=%s" % search_keyword
     request = urllib.request.Request(url)
     request.add_header("X-Naver-Client-Id",client_id)
     request.add_header("X-Naver-Client-Secret",client_secret)
@@ -72,44 +72,44 @@ def fetchPageUrl(id, tel):
             if len(link) > 0:
 
                 with conn.cursor() as cursor:
-                    sql = f"""
+                    sql = """
                     UPDATE
                         leads
                     SET
-                        link = "{link}",
+                        link = %s,
                         isUrlParsed = 1
                     WHERE
-                        id = {id}
-                    """
-                    print(f'{id} {tel} -> {link} is updated.')
+                        id = %s
+                    """ % (link, id)
+                    print('%s %s -> %s is updated.' % (id, tel, link))
                     result = cursor.execute(sql)
                     conn.commit()
             # link가 없을 때
             else:
                 with conn.cursor() as cursor:
-                    sql = f"""
+                    sql = """
                     UPDATE
                         leads
                     SET
                         isUrlParsed = 1
                     WHERE
-                        id = {id}
-                    """
-                    print(f'{id} {tel} does not have a link.')
+                        id = %s
+                    """ % id
+                    print('%s %s does not have a link.' % (id, tel))
                     result = cursor.execute(sql)
                     conn.commit()
         # 검색 결과가 없을 때
         else:
             with conn.cursor() as cursor:
-                    sql = f"""
+                    sql = """
                     UPDATE
                         leads
                     SET
                         isUrlParsed = 1
                     WHERE
-                        id = {id}
-                    """
-                    print(f'{id} {tel} does not have any result.')
+                        id = %s
+                    """ % id
+                    print('%s %s does not have any result.' % (id, tel))
                     result = cursor.execute(sql)
                     conn.commit()
     else:
@@ -119,7 +119,7 @@ def extractAddress(address):
     address_list = address.split()
 
     if len(address_list) > 1:
-        address = f'{address_list[0]} {address_list[1]}'
+        address = '%s %s' % (address_list[0],address_list[1])
         return address
 
 # run 3 times each a minute.
