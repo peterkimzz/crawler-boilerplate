@@ -72,15 +72,15 @@ def fetchPageUrl(id, tel):
             if len(link) > 0:
 
                 with conn.cursor() as cursor:
-                    sql = """
+                    sql = '''
                     UPDATE
                         leads
                     SET
-                        link = %s,
+                        link = "%s",
                         isUrlParsed = 1
                     WHERE
                         id = %s
-                    """ % (link, id)
+                    ''' % (link, id)
                     print('%s %s -> %s is updated.' % (id, tel, link))
                     result = cursor.execute(sql)
                     conn.commit()
