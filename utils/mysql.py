@@ -2,9 +2,9 @@ import pymysql.cursors
 
 def setupMysql():
 
-    conn = pymysql.connect(host='rds-gmom.cfl7dcbrw3yo.ap-northeast-2.rds.amazonaws.com',
-        user='root',
-        password='rkdskadjaak178',
-        db='sandbox')
+    conn = pymysql.connect(host='YOUR_HOST',
+        user='YOUR_USER',
+        password='YOUR_PASSWORD',
+        db='YOUR_DATABASE')
 
     return conn
